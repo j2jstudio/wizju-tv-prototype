@@ -5,6 +5,8 @@ import { lastChannel, useApp } from '../store';
 import { ChannelLogo } from '../ui/Art';
 import { F, FGroup, useKeyHandler, usePageFocus } from '../ui/F';
 
+// 正在播出格宽度不足以放下「时间 + ● 直播中」时只留圆点（v0.2 §6.7）
+const LIVE_LABEL_MIN_W = 200;
 const PPM = 7; // 每分钟 7px，30 分钟 = 210px
 const MIN = 60000;
 
@@ -108,7 +110,7 @@ export function Epg({ chIds, inline, src }: { chIds?: string[]; inline?: boolean
                       }}
                       onLong={() => app.toggleFav(r.c.id, src)}>
                       <div className="epg-ptitle" style={tx ? { transform: `translateX(${tx}px)` } : undefined}>{p.title}</div>
-                      <div className="epg-ptime" style={tx ? { transform: `translateX(${tx}px)` } : undefined}>{fmtTime(p.start)}{past && <span className="epg-ended">已结束</span>}</div>
+                      <div className="epg-ptime" style={tx ? { transform: `translateX(${tx}px)` } : undefined}>{fmtTime(p.start)}{past && <span className="epg-ended">已结束</span>}{live && <span className={'epg-live' + (w < LIVE_LABEL_MIN_W ? ' dot-only' : '')}><i className="epg-live-dot" /><span className="epg-live-text">直播中</span></span>}</div>
                     </F>
                   );
                 })}

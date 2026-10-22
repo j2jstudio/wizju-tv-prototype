@@ -224,6 +224,11 @@ body { font-family: "Noto Sans CJK SC", "Source Han Sans SC", "PingFang SC", "Mi
 .epg-ptime { font-size: 24px; color: var(--wz-text-3); }
 .epg-prog[data-focused] { opacity: 1; z-index: 6; }
 .epg-prog[data-focused] .epg-ptime { color: var(--wz-text-on-light-2); }
+/* v0.2 §6.7：正在播出 = 时间后 ● 直播中（圆点 live 色，文字 24 text-2）；窄格只留圆点 */
+.epg-live { display: inline-flex; align-items: center; gap: 8px; margin-left: 12px; font-size: var(--wz-fs-caption); color: var(--wz-text-2); vertical-align: middle; }
+.epg-live-dot { flex: none; width: 10px; height: 10px; border-radius: 50%; background: var(--wz-live); }
+.epg-live.dot-only .epg-live-text { display: none; }
+.epg-prog[data-focused] .epg-live { color: var(--wz-text-on-light-2); }
 
 /* ---------- 媒体库 ---------- */
 .lib-scroll { position: absolute; left: 0; right: 0; top: 0; bottom: -54px; overflow: hidden; padding: 0 0 0 0; }
@@ -474,7 +479,7 @@ kbd { display: inline-block; min-width: 36px; padding: 0 8px; margin-right: 8px;
 .src-content { position: absolute; left: 0; right: 0; top: 80px; bottom: 0; }
 
 /* 直播：一屏 10 行 */
-.srcpage .live { position: absolute; left: 0; right: 0; top: 0; bottom: 0; display: flex; gap: 28px; padding-top: 8px; }
+.srcpage .live:not(.epg-prog) { /* 只匹配直播 Tab 容器；避免误伤 EPG 正在播出格 .epg-prog.live */ position: absolute; left: 0; right: 0; top: 0; bottom: 0; display: flex; gap: 28px; padding-top: 8px; }
 .srcpage .live-cats { padding-top: 0; }
 .srcpage .live-cats .list-item { height: 64px; margin-bottom: 4px; }
 .srcpage .live-list { padding-top: 0; }

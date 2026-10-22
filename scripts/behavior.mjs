@@ -344,6 +344,14 @@ const endedN = await p.evaluate(() => Array.from(document.querySelectorAll('.epg
 const pastN = await p.evaluate(() => document.querySelectorAll('.epg-prog.past').length);
 ok(pastN > 0 && endedN === pastN, `已结束节目全部标注“已结束” (${endedN}/${pastN})`);
 ok(!(await p.evaluate(() => Array.from(document.querySelectorAll('.epg-prog:not(.past)')).some((e) => e.textContent.includes('已结束')))), '未结束节目不标注');
+// v0.2 §6.7：正在播出格时间后有「● 直播中」（窄格只留圆点），其他格没有
+const liveInfo = await p.evaluate(() => { const L = Array.from(document.querySelectorAll('.epg-prog.live')); return { n: L.length, dot: L.filter((e) => e.querySelector('.epg-live .epg-live-dot')).length, label: L.filter((e) => { const t = e.querySelector('.epg-live-text'); return t && t.textContent === '直播中' && getComputedStyle(t).display !== 'none'; }).length, narrowOk: L.every((e) => !e.querySelector('.epg-live.dot-only') || e.getBoundingClientRect().width < 200), other: document.querySelectorAll('.epg-prog:not(.live) .epg-live').length, dotColor: L[0] ? getComputedStyle(L[0].querySelector('.epg-live-dot')).backgroundColor : '' }; });
+ok(liveInfo.n > 0 && liveInfo.dot === liveInfo.n && liveInfo.label > 0 && liveInfo.narrowOk, `正在播出格带「● 直播中」(${liveInfo.label} 个带文字 / ${liveInfo.dot} 个圆点 / ${liveInfo.n} 格)`);
+ok(liveInfo.other === 0 && liveInfo.dotColor === 'rgb(232, 52, 90)', '只有正在播出格有直播标识，圆点为直播色 ' + liveInfo.dotColor);
+const liveHere = () => p.evaluate(() => document.querySelector('[data-focused]')?.classList.contains('live'));
+for (let i = 0; i < 6 && !(await liveHere()); i++) await key('ArrowRight');
+const liveF = await p.evaluate(() => { const e = document.querySelector('[data-focused]'); const t = e?.querySelector('.epg-live'); return { live: !!e?.classList.contains('live'), c: t ? getComputedStyle(t).color : '', one: document.querySelectorAll('[data-focused]').length === 1 }; });
+ok(liveF.live && liveF.one && liveF.c === 'rgb(77, 77, 77)', '焦点可落到正在播出格，标签转深色 ' + liveF.c + ' ' + (await fid()));
 const pastHere = () => p.evaluate(() => { const e = document.querySelector('[data-focused]'); return e?.classList.contains('past') ? 'self' : e?.previousElementSibling?.classList.contains('past') ? 'prev' : ''; });
 for (let i = 0; i < 12 && !(await pastHere()); i++) await key('ArrowDown');
 if ((await pastHere()) === 'prev') await key('ArrowLeft');
