@@ -203,7 +203,7 @@ function LivePlayer({ req }: { req: Extract<PlayReq, { kind: 'live' }> }) {
       <F id="pl:idle" className="pl-idle" />
       <div className="pl-chmark"><ChannelLogo c={ch} size="sm" /></div>
       {loading && <div className="pl-loading"><div className="spinner" /></div>}
-      {reconnect !== 0 && <div className="reconnect">{reconnect === 'fail' ? '信号中断：重连失败，可按 ▲▼ 换台' : `信号中断，正在自动重连（${reconnect}/3）…`}</div>}
+      {reconnect !== 0 && <div className="reconnect"><span className="reconnect-icon">!</span>{reconnect === 'fail' ? '信号中断：重连失败，可按 ▲▼ 换台' : `信号中断，正在自动重连（${reconnect}/3）…`}</div>}
       <div className={'live-banner' + (banner && !chList ? ' show' : '') + (banner === 'info' ? ' lb-info' : '')}>
         <div className="lb-left"><div className="lb-num">{ch.num}</div><ChannelLogo c={ch} size="md" /></div>
         <div className="lb-main">

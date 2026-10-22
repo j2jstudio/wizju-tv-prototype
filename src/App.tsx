@@ -2,7 +2,7 @@ import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { CHANNELS } from './data';
 import { engine, type Dir, type RKey } from './engine/focus';
 import { AppProvider, TAB_LABEL, flags, isSrcTab, lastChannel, useApp, type Tab } from './store';
-import { TYPE_ICON, TYPE_LABEL, shortName } from './sources';
+import { TYPE_ICON, shortName } from './sources';
 import { F, FGroup, useFocusWithin, useKeyHandler, useScope } from './ui/F';
 import { Icon } from './ui/Icons';
 import { Home } from './screens/Home';
@@ -267,7 +267,7 @@ function Nav() {
               onFocus={() => focusNav(t)}
               onOk={() => { if (t === 'add') goAdd(app); else engine.move('right'); }}>
               <Icon name={isSrcTab(t) ? TYPE_ICON[t] : NAV_ICON[t]} size={34} />
-              <span className="nav-text"><span className="nav-label">{TAB_LABEL[t]}</span>{src && isSrcTab(t) && <small>{TYPE_LABEL[t]} · {shortName(src.name)}</small>}</span>
+              <span className="nav-text"><span className="nav-label">{TAB_LABEL[t]}</span>{src && isSrcTab(t) && <small>{shortName(src.name)}</small>}</span>
             </F>
           );
         })}

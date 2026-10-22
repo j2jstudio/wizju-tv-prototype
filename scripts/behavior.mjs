@@ -30,8 +30,8 @@ ok(rows === '继续观看 · 下一集 | 收藏频道 | 我的源 | 最近添加
 await key('ArrowRight');
 const st = await p.evaluate(() => { const e = document.querySelector('[data-focused]'); const cs = getComputedStyle(e); return { a: new DOMMatrix(cs.transform).a, sh: cs.boxShadow, d: cs.transitionDuration }; });
 ok(st.a >= 1.05 && st.a <= 1.08, '卡片焦点放大 ' + st.a);
-ok(/rgb\(255, 255, 255\) 0px 0px 0px 4px/.test(st.sh), '卡片白色描边 + 阴影');
-ok(st.d.split(',').every((d) => parseFloat(d) === 0.18), '焦点动画 180ms: ' + st.d);
+ok(/rgb\(238, 123, 34\) 0px 0px 0px 5px/.test(st.sh), '卡片橙色描边（v0.2：3px 橙 + 2px 间隙）+ 阴影: ' + st.sh);
+ok(st.d.split(',').every((d) => parseFloat(d) === 0.15), '焦点动画 150ms（v0.2）: ' + st.d);
 await key('ArrowRight'); await key('ArrowDown'); await key('ArrowUp');
 ok((await fid()) === 'home:r0:2', '焦点记忆：回到上一行原位 (' + (await fid()) + ')');
 await longOk(450);
@@ -91,7 +91,7 @@ const srcCards = await p.evaluate(() => document.querySelectorAll('.home .srccar
 ok(srcCards === 12, '“我的源”行每个源一张卡: ' + srcCards);
 ok((await navIds()) === 'nav:home,nav:iptv,nav:emby,nav:xtream,nav:other,nav:search,nav:settings', '导航 = 首页 / 源类型 / 搜索 / 设置: ' + (await navIds()));
 ok((await rect('.rail')).w === 300, '导航获得焦点时展开到 300px');
-ok((await txt('[data-fid="nav:emby"] small')) === 'Emby · 家庭影院', '展开时显示“类型 · 当前源名”: ' + (await txt('[data-fid="nav:emby"] small')));
+ok((await txt('[data-fid="nav:emby"] small')) === '家庭影院', '展开时显示当前源名（v0.2 §6.1 去掉“类型 · ”前缀）: ' + (await txt('[data-fid="nav:emby"] small')));
 await key('ArrowDown', 500);
 ok((await fid()) === 'nav:iptv', '导航到 IPTV');
 await key('ArrowRight', 400);
@@ -147,7 +147,7 @@ ok((await txt('.lib-count')).includes('公司NAS'), '海报墙是新源的内容
 await key('Escape'); await key('Escape');
 ok((await fid()) === 'nav:emby', '返回到导航');
 await key('ArrowUp', 500);
-ok((await txt('[data-fid="nav:iptv"] small')) === 'IPTV · 体育专线', '每种类型记住上次的源（导航小字）');
+ok((await txt('[data-fid="nav:iptv"] small')) === '体育专线', '每种类型记住上次的源（导航小字）');
 await key('ArrowRight', 400);
 ok((await txt('.src-btn')).includes('体育专线') && (await txt('.sec-tab.sel')) === '节目单', '回到 IPTV：仍是 体育专线 + 节目单');
 // 连接失败的源
@@ -162,7 +162,7 @@ await key('Escape', 300);
 ok(!(await q('.src-panel')) && (await txt('.src-btn')).includes('体育专线'), '没有切到失败的源');
 // 其他 = Jellyfin / Plex / 本地媒体（Stalker 已并入 IPTV）
 await key('ArrowLeft'); await until((f) => f === 'nav:other', 'ArrowDown', 6);
-ok((await fid()) === 'nav:other' && (await txt('[data-fid="nav:other"] small')) === '其他 · Jellyfin 书…', '导航到 其他（默认第一个源 Jellyfin 书房，名字超过 10 字截断）: ' + (await txt('[data-fid="nav:other"] small')));
+ok((await fid()) === 'nav:other' && (await txt('[data-fid="nav:other"] small')) === 'Jellyfin 书…', '导航到 其他（默认第一个源 Jellyfin 书房，名字超过 10 字截断）: ' + (await txt('[data-fid="nav:other"] small')));
 await key('ArrowRight', 400);
 ok((await txt('.sec-tabs')) === '电影剧集' && (await txt('.sec-kind')) === 'Jellyfin', '其他 · Jellyfin：电影、剧集，右侧显示源类型');
 await key('ArrowLeft'); await key('Enter', 400);
@@ -297,7 +297,7 @@ ok((await fid()) === 'nav:xtream', 'popstate → 导航');
 await p.goto(URL + '?paired=1&hints=0&fresh=1&livemerge=1'); await wait(800);
 ok((await navIds()) === 'nav:home,nav:live,nav:emby,nav:other,nav:search,nav:settings', '合并模式：M3U + Xtream + Stalker 合成一个“IPTV”: ' + (await navIds()));
 await key('Escape'); await key('ArrowDown', 500);
-ok((await txt('[data-fid="nav:live"] small')) === 'IPTV · 家里的M3U' && !(await txt('[data-nav]')).includes('直播源'), '合并后的导航项叫“IPTV”（IPTV · 家里的M3U），没有“直播源”');
+ok((await txt('[data-fid="nav:live"] small')) === '家里的M3U' && (await txt('[data-fid="nav:live"] .nav-label')) === 'IPTV' && !(await txt('[data-nav]')).includes('直播源'), '合并后的导航项叫“IPTV”（小字 家里的M3U），没有“直播源”');
 await key('ArrowRight', 400); await key('ArrowLeft'); await key('Enter', 400);
 ok((await p.evaluate(() => Array.from(document.querySelectorAll('.src-panel .sp-section')).map((e) => e.textContent).join(','))) === 'M3U,Xtream,Stalker', '源列表按类型分组：M3U / Xtream / Stalker');
 ok((await p.evaluate(() => document.querySelectorAll('.src-panel .sp-src').length)) === 7, '合并后 7 个 IPTV 源');
