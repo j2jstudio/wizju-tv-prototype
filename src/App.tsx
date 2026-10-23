@@ -244,15 +244,26 @@ function Nav() {
     if (app.tab === t) return;
     q.tab = t; q.t = window.setTimeout(() => { if (q.tab !== t) return; q.tab = null; if (engine.current === 'nav:' + t) app.setTab(t); }, 300);
   };
-  const kh = useKeyHandler((k) => {
-    const q = pend.current;
-    if (!q.tab || !((k.type === 'dir' && k.dir === 'right') || k.type === 'ok')) return false;
-    const t = q.tab; clearTimeout(q.t); q.tab = null;
-    if (t === 'add') { if (k.type === 'ok') goAdd(app); return true; }
-    app.setTab(t);
+  /** 进入导航项：切到对应页，源类型落到二级分类 Tab；供确认键 / 点击 / 右键共用（点击不能只 move right，否则内容还没挂载） */
+  const enterNav = (t: Tab) => {
+    const q = pend.current; clearTimeout(q.t); q.tab = null;
+    if (t === 'add') { goAdd(app); return; }
+    if (app.tab !== t) app.setTab(t);
     const cat = isSrcTab(t) ? app.catFor(t) : undefined;
     if (cat) app.focusAfter('sec:tab:' + cat);
     else requestAnimationFrame(() => requestAnimationFrame(() => engine.move('right')));
+  };
+  const kh = useKeyHandler((k) => {
+    const q = pend.current;
+    if (!((k.type === 'dir' && k.dir === 'right') || k.type === 'ok')) return false;
+    // 有待切换的项就进那一项；否则进当前焦点导航项（点击/已 dwell 后的确认）
+    const t = q.tab || (engine.current?.startsWith('nav:') ? engine.current.slice(4) as Tab : null);
+    if (!t || app.navTabs.indexOf(t) < 0) return false;
+    if (k.type === 'dir' && k.dir === 'right' && !q.tab && app.tab === t) {
+      // 已在该页：右键只进内容，走显式 right 目标
+      return false;
+    }
+    enterNav(t);
     return true;
   });
   return (
@@ -265,7 +276,7 @@ function Nav() {
           return (
             <F key={t} id={'nav:' + t} className={'nav-item' + (app.tab === t ? ' active' : '')} right={cat ? 'sec:tab:' + cat : undefined}
               onFocus={() => focusNav(t)}
-              onOk={() => { if (t === 'add') goAdd(app); else engine.move('right'); }}>
+              onOk={() => enterNav(t)}>
               <Icon name={isSrcTab(t) ? TYPE_ICON[t] : NAV_ICON[t]} size={34} />
               <span className="nav-text"><span className="nav-label">{TAB_LABEL[t]}</span>{src && isSrcTab(t) && <small>{shortName(src.name)}</small>}</span>
             </F>
